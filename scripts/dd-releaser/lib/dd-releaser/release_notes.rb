@@ -3,6 +3,10 @@ module DDReleaser
     class ValidationError < DDReleaser::Error
     end
 
+    attr_reader :version
+    attr_reader :date
+    attr_reader :body
+
     def initialize(version:, date:, body:)
       @version = version
       @date = date
