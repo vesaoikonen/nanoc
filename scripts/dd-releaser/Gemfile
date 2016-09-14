@@ -1,0 +1,10 @@
+source 'https://rubygems.org'
+
+gemspec
+
+group :devel do
+  gem 'fuubar'
+  gem 'rake'
+  gem 'rspec'
+  gem 'rspec-mocks'
+end

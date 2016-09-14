@@ -1,3 +1,5 @@
+require_relative 'dd-releaser/version'
 require_relative 'dd-releaser/gem_cmd'
 require_relative 'dd-releaser/git_cmd'
 require_relative 'dd-releaser/executor'
+require_relative 'dd-releaser/runner'

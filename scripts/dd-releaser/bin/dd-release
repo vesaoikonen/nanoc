@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require 'dd-releaser'
+
+runner =
+  DDReleaser::Runner.new(
+    io: $stdout,
+    github_repo_name: 'ddfreyne/dd-releaser',
+    version_file: 'lib/dd-releaser/version.rb',
+    version_constant: 'DDReleaser::VERSION',
+  )
+
+runner.run
