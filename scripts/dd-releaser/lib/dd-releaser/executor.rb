@@ -18,11 +18,13 @@ module DDReleaser
 
     class Real < Executor
       def exec(*args)
+        puts('>>> ' + args.join(' '))
         system(*args)
       end
 
       def rm(filename)
-        FileUtils.rm_f(fn)
+        puts('>>> rm ' + filename)
+        FileUtils.rm_f(filename)
       end
     end
 

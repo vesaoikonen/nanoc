@@ -1,12 +1,15 @@
 #!/usr/bin/env ruby
 require 'dd-releaser'
 
+executor = DDReleaser::Executor.obtain
+
 runner =
   DDReleaser::Runner.new(
     io: $stdout,
     github_repo_name: 'ddfreyne/dd-releaser',
     version_file: 'lib/dd-releaser/version.rb',
     version_constant: 'DDReleaser::VERSION',
+    gem_cmd: DDReleaser::GemCmd.new(executor),
   )
 
 runner.run
