@@ -8,7 +8,7 @@ describe DDReleaser::GemCmd do
 
     it 'records' do
       subject
-      expect(store).to eql([['gem', 'build', 'abc-1.0.0.gemspec']])
+      expect(store).to eql([[:system, 'gem', 'build', 'abc-1.0.0.gemspec']])
     end
   end
 
@@ -17,7 +17,7 @@ describe DDReleaser::GemCmd do
 
     it 'records' do
       subject
-      expect(store).to eql([['gem', 'push', 'abc-1.0.0.gemspec']])
+      expect(store).to eql([[:system, 'gem', 'push', 'abc-1.0.0.gemspec']])
     end
   end
 
@@ -38,7 +38,7 @@ describe DDReleaser::GemCmd do
 
       it 'records' do
         subject
-        expect(store).to eql([[:__rm, 'lol.gem']])
+        expect(store).to eql([[:rm, 'lol.gem']])
       end
     end
   end

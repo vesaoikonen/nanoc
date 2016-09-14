@@ -7,7 +7,16 @@ describe DDReleaser::Executor do
 
     it 'records' do
       subject
-      expect(store).to eql([['a', 'b']])
+      expect(store).to eql([[:system, 'a', 'b']])
+    end
+  end
+
+  describe '#rm' do
+    subject { cmd.rm('a.txt') }
+
+    it 'records' do
+      subject
+      expect(store).to eql([[:rm, 'a.txt']])
     end
   end
 end

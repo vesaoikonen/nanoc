@@ -34,11 +34,11 @@ module DDReleaser
       end
 
       def exec(*args)
-        @store << args
+        @store << [:system, *args]
       end
 
       def rm(filename)
-        @store << [:__rm, filename]
+        @store << [:rm, filename]
       end
     end
   end

@@ -8,7 +8,7 @@ describe DDReleaser::GitCmd do
 
     it 'records' do
       subject
-      expect(store).to eql([['git', 'tag', '--sign', '--annotate', '1.0.0', '--message', 'Version 1.0.0']])
+      expect(store).to eql([[:system, 'git', 'tag', '--sign', '--annotate', '1.0.0', '--message', 'Version 1.0.0']])
     end
   end
 
@@ -17,7 +17,7 @@ describe DDReleaser::GitCmd do
 
     it 'records' do
       subject
-      expect(store).to eql([['git', 'push', 'origin', '--tags']])
+      expect(store).to eql([[:system, 'git', 'push', 'origin', '--tags']])
     end
   end
 end
