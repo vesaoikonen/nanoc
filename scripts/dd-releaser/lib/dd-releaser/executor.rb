@@ -12,9 +12,17 @@ module DDReleaser
       raise NotImplementedError
     end
 
+    def rm(filename)
+      raise NotImplementedError
+    end
+
     class Real < Executor
       def exec(*args)
         system(*args)
+      end
+
+      def rm(filename)
+        FileUtils.rm_f(fn)
       end
     end
 
@@ -25,6 +33,10 @@ module DDReleaser
 
       def exec(*args)
         @store << args
+      end
+
+      def rm(filename)
+        @store << [:__rm, filename]
       end
     end
   end

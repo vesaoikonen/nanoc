@@ -11,5 +11,9 @@ module DDReleaser
     def push(gem_file_name)
       @executor.exec('gem', 'push', gem_file_name)
     end
+
+    def remove_old
+      Dir['*.gem'].each { |fn| @executor.rm(fn) }
+    end
   end
 end
