@@ -9,6 +9,7 @@ module DDReleaser
 
     def run
       version = read_version
+      validate_release_notes
     end
 
     private
@@ -21,6 +22,15 @@ module DDReleaser
       @io.puts
 
       version
+    end
+
+    def validate_release_notes
+      puts '=== Validating release notes…'
+      unless File.readlines('NEWS.md').drop(2).first =~ / \(\d{4}-\d{2}-\d{2}\)$/
+        $stderr.puts 'No proper release date found!'
+        exit 1
+      end
+      puts
     end
   end
 end
