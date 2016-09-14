@@ -9,9 +9,12 @@ module DDReleaser
 
     def run
       version = read_version
-      release_notes = read_release_notes
+      release_notes = ReleaseNotesReader.new.read
 
-      validate(version, release_notes)
+      release_notes.validate_against(version)
+    rescue DDReleaser::Error => e
+      @io.puts "ERROR: #{e.message}"
+      exit
     end
 
     private
@@ -21,36 +24,6 @@ module DDReleaser
     def read_version
       load(@version_file)
       eval(@version_constant)
-    end
-
-    def read_release_notes
-      lines = File.readlines('NEWS.md')
-
-      identifier_line = lines.drop(2).first
-      body = lines.drop(4).take_while { |l| l !~ /^## / }.join
-
-      regexp = /^## (\d\.\d\.\d) \((\d{4}-\d{2}-\d{2})\)$\n/
-      version = identifier_line.sub(regexp, '\1')
-      date = identifier_line.sub(regexp, '\2')
-
-      ReleaseNotes.new(version, date, body)
-    end
-
-    def validate(version, release_notes)
-      unless release_notes.version =~ /\A\d\.\d\.\d\z/
-        @io.puts "ERROR: version specified in release notes is malformed"
-        exit
-      end
-
-      unless release_notes.date =~ /\A\d{4}-\d{2}-\d{2}\z/
-        @io.puts "ERROR: date specified in release notes is malformed"
-        exit
-      end
-
-      unless release_notes.version == version
-        @io.puts "ERROR: version specified in release notes is incorrect"
-        exit
-      end
     end
   end
 end
