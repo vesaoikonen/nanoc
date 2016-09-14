@@ -1,5 +1,6 @@
 describe DDReleaser::GemCmd do
-  subject(:cmd) { described_class.obtain_fake(store) }
+  subject(:cmd) { described_class.new(executor) }
+  let(:executor) { DDReleaser::Executor.obtain_fake(store) }
   let(:store) { [] }
 
   describe '#build' do
@@ -7,7 +8,7 @@ describe DDReleaser::GemCmd do
 
     it 'records' do
       subject
-      expect(store).to eql([[:gem, :build, 'abc-1.0.0.gemspec']])
+      expect(store).to eql([['gem', 'build', 'abc-1.0.0.gemspec']])
     end
   end
 
@@ -16,7 +17,7 @@ describe DDReleaser::GemCmd do
 
     it 'records' do
       subject
-      expect(store).to eql([[:gem, :push, 'abc-1.0.0.gemspec']])
+      expect(store).to eql([['gem', 'push', 'abc-1.0.0.gemspec']])
     end
   end
 end
