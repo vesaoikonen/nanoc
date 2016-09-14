@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
-GEMSPEC_NAME = 'nanoc.gemspec'
-VERSION_FILE = './lib/nanoc/version'
-VERSION_CONSTANT = 'Nanoc::VERSION'
+GEMSPEC_NAME      = 'nanoc.gemspec'
+VERSION_FILE      = './lib/nanoc/version'
+VERSION_CONSTANT  = 'Nanoc::VERSION'
 GITHUB_REPOSITORY = 'nanoc/nanoc'
-GEM_NAME = 'nanoc'
+GEM_NAME          = 'nanoc'
 
 require 'fileutils'
 require 'octokit'
@@ -31,15 +31,10 @@ def run(*args)
   end
 end
 
-puts '=== Logging in to GitHub’s API…'
-client = Octokit::Client.new(netrc: true)
-puts
-
-puts '=== Deleting old *.gem files…'
-Dir['*.gem'].each do |fn|
-  puts "  #{fn}…"
-  FileUtils.rm_f(fn)
-end
+puts '=== Reading version…'
+require VERSION_FILE
+version = eval(VERSION_CONSTANT)
+puts "Version = #{version}"
 puts
 
 puts '=== Verifying presence of release date…'
@@ -49,14 +44,16 @@ unless File.readlines('NEWS.md').drop(2).first =~ / \(\d{4}-\d{2}-\d{2}\)$/
 end
 puts
 
-puts '=== Building new gem…'
-run('gem', 'build', "#{GEM_NAME}.gemspec")
+puts '=== Reading release notes…'
+release_notes =
+  File.readlines('NEWS.md')
+      .drop(4)
+      .take_while { |l| l !~ /^## / }
+      .join
 puts
 
-puts '=== Reading version…'
-require VERSION_FILE
-version = eval(VERSION_CONSTANT)
-puts "Version = #{version}"
+puts '=== Logging in to GitHub’s API…'
+client = Octokit::Client.new(netrc: true)
 puts
 
 puts '=== Verifying that release does not yet exist…'
@@ -67,6 +64,17 @@ if release
   $stderr.puts 'ABORTED!'
   exit 1
 end
+puts
+
+puts '=== Deleting old *.gem files…'
+Dir['*.gem'].each do |fn|
+  puts "  #{fn}…"
+  FileUtils.rm_f(fn)
+end
+puts
+
+puts '=== Building new gem…'
+run('gem', 'build', "#{GEM_NAME}.gemspec")
 puts
 
 puts '=== Creating Git tag…'
@@ -80,14 +88,6 @@ puts
 
 puts '=== Pushing gem…'
 run('gem', 'push', "#{GEM_NAME}-#{version}.gem")
-puts
-
-puts '=== Reading release notes…'
-release_notes =
-  File.readlines('NEWS.md')
-      .drop(4)
-      .take_while { |l| l !~ /^## / }
-      .join
 puts
 
 puts '=== Creating release on GitHub…'
