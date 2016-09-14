@@ -1,11 +1,12 @@
 module DDReleaser
   class Runner
-    def initialize(io: $stdout, github_repo_name:, version_file:, version_constant:, gem_cmd:)
+    def initialize(io: $stdout, github_repo_name:, version_file:, version_constant:, gem_cmd:, gemspec_file:)
       @io = io
       @github_repo_name = github_repo_name
       @version_file = version_file
       @version_constant = version_constant
       @gem_cmd = gem_cmd
+      @gemspec_file = gemspec_file
     end
 
     def run
@@ -16,6 +17,9 @@ module DDReleaser
 
       puts '=== Removing old gems…'
       @gem_cmd.remove_old
+
+      puts '=== Building gem…'
+      @gem_cmd.build(@gemspec_file)
     rescue DDReleaser::Error => e
       @io.puts "ERROR: #{e.message}"
       exit

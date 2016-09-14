@@ -14,11 +14,11 @@ Gem::Specification.new do |s|
     Dir['[A-Z]*'] +
     Dir['{bin,lib,spec}/**/*'] +
     ['dd-releaser.gemspec']
-  s.executables        = ['dd-releaser']
+  s.executables        = ['dd-release']
   s.require_paths      = ['lib']
 
   s.rdoc_options     = ['--main', 'README.md']
-  s.extra_rdoc_files = ['ChangeLog', 'LICENSE', 'README.md', 'NEWS.md']
+  s.extra_rdoc_files = ['LICENSE', 'README.md', 'NEWS.md']
 
   s.required_ruby_version = '>= 2.1.0'
 

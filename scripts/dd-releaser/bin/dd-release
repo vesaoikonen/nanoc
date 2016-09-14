@@ -10,6 +10,7 @@ runner =
     version_file: 'lib/dd-releaser/version.rb',
     version_constant: 'DDReleaser::VERSION',
     gem_cmd: DDReleaser::GemCmd.new(executor),
+    gemspec_file: 'dd-releaser.gemspec',
   )
 
 runner.run
