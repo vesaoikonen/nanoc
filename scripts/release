@@ -1,6 +1,12 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
+GEMSPEC_NAME = 'nanoc.gemspec'
+VERSION_FILE = './lib/nanoc/version'
+VERSION_CONSTANT = 'Nanoc::VERSION'
+GITHUB_REPOSITORY = 'nanoc/nanoc'
+GEM_NAME = 'nanoc'
+
 require 'fileutils'
 require 'octokit'
 
@@ -44,17 +50,18 @@ end
 puts
 
 puts '=== Building new gem…'
-run('gem', 'build', 'nanoc.gemspec')
+run('gem', 'build', "#{GEM_NAME}.gemspec")
 puts
 
 puts '=== Reading version…'
-require './lib/nanoc/version'
-puts "Version = #{Nanoc::VERSION}"
+require VERSION_FILE
+version = eval(VERSION_CONSTANT)
+puts "Version = #{version}"
 puts
 
 puts '=== Verifying that release does not yet exist…'
-releases = client.releases('nanoc/nanoc')
-release = releases.find { |r| r.tag_name == Nanoc::VERSION }
+releases = client.releases(GITHUB_REPOSITORY)
+release = releases.find { |r| r.tag_name == version }
 if release
   $stderr.puts 'Release already exists!'
   $stderr.puts 'ABORTED!'
@@ -63,7 +70,7 @@ end
 puts
 
 puts '=== Creating Git tag…'
-run('git', 'tag', '--sign', '--annotate', Nanoc::VERSION, '--message', "Version #{Nanoc::VERSION}")
+run('git', 'tag', '--sign', '--annotate', version, '--message', "Version #{version}")
 puts
 
 puts '=== Pushing Git data…'
@@ -72,7 +79,7 @@ run('git', 'push', 'origin', '--tags')
 puts
 
 puts '=== Pushing gem…'
-run('gem', 'push', "nanoc-#{Nanoc::VERSION}.gem")
+run('gem', 'push', "#{GEM_NAME}-#{version}.gem")
 puts
 
 puts '=== Reading release notes…'
@@ -85,9 +92,9 @@ puts
 
 puts '=== Creating release on GitHub…'
 sleep 3 # Give GitHub some time to detect the new tag
-is_prerelease = Nanoc::VERSION =~ /a|b|rc/ || Nanoc::VERSION =~ /^0/
+is_prerelease = version =~ /a|b|rc/ || version =~ /^0/
 client.create_release(
-  'nanoc/nanoc', Nanoc::VERSION,
+  GITHUB_REPOSITORY, version,
   prerelease: !!is_prerelease,
   body: release_notes
 )
