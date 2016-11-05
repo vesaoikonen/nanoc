@@ -9,15 +9,24 @@ module Nanoc::Int
 
     def each
       graph = Nanoc::Int::DirectedGraph.new(@reps)
+      roots_to_consider = []
 
       loop do
-        break if graph.roots.empty?
-        rep = graph.roots.each { |e| break e }
+        if roots_to_consider.empty?
+          roots_to_consider = graph.roots
+        end
+
+        if roots_to_consider.empty?
+          break
+        end
+
+        rep = roots_to_consider.each { |e| break e }
 
         begin
           yield(rep)
           graph.delete_vertex(rep)
         rescue Nanoc::Int::Errors::UnmetDependency => e
+          roots_to_consider.delete(rep)
           handle_dependency_error(e, rep, graph)
         end
       end
