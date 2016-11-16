@@ -208,9 +208,9 @@ module Nanoc::Int
       # Find item reps to compile and compile them
       outdated_reps = @reps.select { |r| outdatedness_checker.outdated?(r) }
       selector = Nanoc::Int::ItemRepSelector.new(outdated_reps)
-      selector.each do |rep, graph|
+      selector.each do |rep|
         @stack = []
-        compile_rep(rep, selector, graph)
+        compile_rep(rep)
       end
     ensure
       Nanoc::Int::NotificationCenter.remove(:processing_started, self)
@@ -226,7 +226,7 @@ module Nanoc::Int
     # @param [Nanoc::Int::ItemRep] rep The rep that is to be compiled
     #
     # @return [void]
-    def compile_rep(rep, selector, graph)
+    def compile_rep(rep)
       @fibers ||= {}
 
       dependency_tracker = Nanoc::Int::DependencyTracker.new(@dependency_store)
