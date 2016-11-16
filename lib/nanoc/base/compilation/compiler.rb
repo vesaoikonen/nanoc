@@ -245,9 +245,9 @@ module Nanoc::Int
             recalculate_content_for_rep(rep, dependency_tracker)
           end
 
+          rep.compiled = true
           compiled_content_cache[rep] = rep.snapshot_contents
 
-          rep.compiled = true
           @fibers.delete(rep)
           $stderr.puts ">>> finished #{rep.inspect}"
 
