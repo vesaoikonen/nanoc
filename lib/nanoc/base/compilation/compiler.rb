@@ -231,9 +231,8 @@ module Nanoc::Int
 
       dependency_tracker = Nanoc::Int::DependencyTracker.new(@dependency_store)
 
-      fiber = @fibers.fetch(rep) do
+      @fibers[rep] ||=
         Fiber.new do
-
           Nanoc::Int::NotificationCenter.post(:compilation_started, rep)
           Nanoc::Int::NotificationCenter.post(:processing_started,  rep)
           dependency_tracker.enter(rep.item)
@@ -242,27 +241,32 @@ module Nanoc::Int
             Nanoc::Int::NotificationCenter.post(:cached_content_used, rep)
             rep.snapshot_contents = compiled_content_cache[rep]
           else
+            $stderr.puts ">>> recalculating content for #{rep.inspect}"
             recalculate_content_for_rep(rep, dependency_tracker)
           end
 
-          rep.compiled = true
           compiled_content_cache[rep] = rep.snapshot_contents
+
+          rep.compiled = true
+          @fibers.delete(rep)
+          $stderr.puts ">>> finished #{rep.inspect}"
 
           Nanoc::Int::NotificationCenter.post(:processing_ended,  rep)
           Nanoc::Int::NotificationCenter.post(:compilation_ended, rep)
         end
-      end
 
+      fiber = @fibers[rep]
       while fiber.alive?
+        $stderr.puts ">>> resumed #{rep.inspect}"
+
         res = fiber.resume
 
         if res.is_a?(Nanoc::Int::Errors::UnmetDependency)
+          $stderr.puts ">>> suspended #{rep.inspect}"
           Nanoc::Int::NotificationCenter.post(:compilation_suspended, rep, res)
           raise(res)
         end
       end
-
-      @fibers.delete(rep)
     ensure
       dependency_tracker.exit(rep.item)
     end
