@@ -68,6 +68,7 @@ module Nanoc::Helpers
 
           unless rep.compiled?
             Fiber.yield(Nanoc::Int::Errors::UnmetDependency.new(rep))
+            return content_for(*args, &block)
           end
         end
 
