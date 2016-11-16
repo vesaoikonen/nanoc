@@ -217,8 +217,6 @@ module Nanoc::Int
       Nanoc::Int::NotificationCenter.remove(:processing_ended,   self)
     end
 
-    FIBER_DONE = Object.new
-
     # Compiles the given item representation.
     #
     # This method should not be called directly; please use
@@ -239,22 +237,23 @@ module Nanoc::Int
         Nanoc::Int::NotificationCenter.post(:cached_content_used, rep)
         rep.snapshot_contents = compiled_content_cache[rep]
       else
-        fiber = Fiber.new do
-          recalculate_content_for_rep(rep, dependency_tracker)
-          FIBER_DONE
+        @fibers ||= {}
+
+        fiber = @fibers.fetch(rep) do
+          Fiber.new do
+            recalculate_content_for_rep(rep, dependency_tracker)
+          end
         end
 
         while fiber.alive?
           res = fiber.resume
 
-          if res.equal?(FIBER_DONE)
-            break
-          end
-
           if res.is_a?(Nanoc::Int::Errors::UnmetDependency)
-            selector.handle_dependency_error(res, rep, graph)
+            raise(res)
           end
         end
+
+        @fibers.delete(rep)
       end
 
       rep.compiled = true
