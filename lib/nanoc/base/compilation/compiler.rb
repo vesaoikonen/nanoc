@@ -249,6 +249,7 @@ module Nanoc::Int
           res = fiber.resume
 
           if res.is_a?(Nanoc::Int::Errors::UnmetDependency)
+            Nanoc::Int::NotificationCenter.post(:compilation_suspended, rep, res)
             raise(res)
           end
         end
@@ -261,10 +262,6 @@ module Nanoc::Int
 
       Nanoc::Int::NotificationCenter.post(:processing_ended,  rep)
       Nanoc::Int::NotificationCenter.post(:compilation_ended, rep)
-    rescue => e
-      rep.forget_progress
-      Nanoc::Int::NotificationCenter.post(:compilation_failed, rep, e)
-      raise e
     ensure
       dependency_tracker.exit(rep.item)
     end

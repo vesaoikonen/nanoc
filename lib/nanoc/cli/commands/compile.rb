@@ -273,7 +273,7 @@ module Nanoc::CLI::Commands
           puts "*** Ended compilation of #{rep.inspect}"
           puts
         end
-        Nanoc::Int::NotificationCenter.on(:compilation_failed) do |rep, e|
+        Nanoc::Int::NotificationCenter.on(:compilation_suspended) do |rep, e|
           puts "*** Suspended compilation of #{rep.inspect}: #{e.message}"
         end
         Nanoc::Int::NotificationCenter.on(:cached_content_used) do |rep|
