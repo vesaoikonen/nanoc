@@ -227,41 +227,42 @@ module Nanoc::Int
     #
     # @return [void]
     def compile_rep(rep, selector, graph)
+      @fibers ||= {}
+
       dependency_tracker = Nanoc::Int::DependencyTracker.new(@dependency_store)
 
-      Nanoc::Int::NotificationCenter.post(:compilation_started, rep)
-      Nanoc::Int::NotificationCenter.post(:processing_started,  rep)
-      dependency_tracker.enter(rep.item)
+      fiber = @fibers.fetch(rep) do
+        Fiber.new do
 
-      if can_reuse_content_for_rep?(rep)
-        Nanoc::Int::NotificationCenter.post(:cached_content_used, rep)
-        rep.snapshot_contents = compiled_content_cache[rep]
-      else
-        @fibers ||= {}
+          Nanoc::Int::NotificationCenter.post(:compilation_started, rep)
+          Nanoc::Int::NotificationCenter.post(:processing_started,  rep)
+          dependency_tracker.enter(rep.item)
 
-        fiber = @fibers.fetch(rep) do
-          Fiber.new do
+          if can_reuse_content_for_rep?(rep)
+            Nanoc::Int::NotificationCenter.post(:cached_content_used, rep)
+            rep.snapshot_contents = compiled_content_cache[rep]
+          else
             recalculate_content_for_rep(rep, dependency_tracker)
           end
+
+          rep.compiled = true
+          compiled_content_cache[rep] = rep.snapshot_contents
+
+          Nanoc::Int::NotificationCenter.post(:processing_ended,  rep)
+          Nanoc::Int::NotificationCenter.post(:compilation_ended, rep)
         end
-
-        while fiber.alive?
-          res = fiber.resume
-
-          if res.is_a?(Nanoc::Int::Errors::UnmetDependency)
-            Nanoc::Int::NotificationCenter.post(:compilation_suspended, rep, res)
-            raise(res)
-          end
-        end
-
-        @fibers.delete(rep)
       end
 
-      rep.compiled = true
-      compiled_content_cache[rep] = rep.snapshot_contents
+      while fiber.alive?
+        res = fiber.resume
 
-      Nanoc::Int::NotificationCenter.post(:processing_ended,  rep)
-      Nanoc::Int::NotificationCenter.post(:compilation_ended, rep)
+        if res.is_a?(Nanoc::Int::Errors::UnmetDependency)
+          Nanoc::Int::NotificationCenter.post(:compilation_suspended, rep, res)
+          raise(res)
+        end
+      end
+
+      @fibers.delete(rep)
     ensure
       dependency_tracker.exit(rep.item)
     end
