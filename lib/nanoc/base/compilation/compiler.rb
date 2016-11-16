@@ -208,14 +208,16 @@ module Nanoc::Int
       # Find item reps to compile and compile them
       outdated_reps = @reps.select { |r| outdatedness_checker.outdated?(r) }
       selector = Nanoc::Int::ItemRepSelector.new(outdated_reps)
-      selector.each do |rep|
+      selector.each do |rep, graph|
         @stack = []
-        compile_rep(rep)
+        compile_rep(rep, selector, graph)
       end
     ensure
       Nanoc::Int::NotificationCenter.remove(:processing_started, self)
       Nanoc::Int::NotificationCenter.remove(:processing_ended,   self)
     end
+
+    FIBER_DONE = Object.new
 
     # Compiles the given item representation.
     #
@@ -226,7 +228,7 @@ module Nanoc::Int
     # @param [Nanoc::Int::ItemRep] rep The rep that is to be compiled
     #
     # @return [void]
-    def compile_rep(rep)
+    def compile_rep(rep, selector, graph)
       dependency_tracker = Nanoc::Int::DependencyTracker.new(@dependency_store)
 
       Nanoc::Int::NotificationCenter.post(:compilation_started, rep)
@@ -237,7 +239,22 @@ module Nanoc::Int
         Nanoc::Int::NotificationCenter.post(:cached_content_used, rep)
         rep.snapshot_contents = compiled_content_cache[rep]
       else
-        recalculate_content_for_rep(rep, dependency_tracker)
+        fiber = Fiber.new do
+          recalculate_content_for_rep(rep, dependency_tracker)
+          FIBER_DONE
+        end
+
+        while fiber.alive?
+          res = fiber.resume
+
+          if res.equal?(FIBER_DONE)
+            break
+          end
+
+          if res.is_a?(Nanoc::Int::Errors::UnmetDependency)
+            selector.handle_dependency_error(res, rep, graph)
+          end
+        end
       end
 
       rep.compiled = true

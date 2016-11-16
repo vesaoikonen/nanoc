@@ -14,12 +14,9 @@ module Nanoc::Int
         break if graph.roots.empty?
         rep = graph.roots.each { |e| break e }
 
-        begin
-          yield(rep)
-          graph.delete_vertex(rep)
-        rescue Nanoc::Int::Errors::UnmetDependency => e
-          handle_dependency_error(e, rep, graph)
-        end
+        yield(rep, graph)
+
+        graph.delete_vertex(rep)
       end
 
       # Check whether everything was compiled

@@ -67,7 +67,7 @@ module Nanoc::Helpers
           dependency_tracker.bounce(item.unwrap)
 
           unless rep.compiled?
-            raise Nanoc::Int::Errors::UnmetDependency.new(rep)
+            Fiber.yield(Nanoc::Int::Errors::UnmetDependency.new(rep))
           end
         end
 

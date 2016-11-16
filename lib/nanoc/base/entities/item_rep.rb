@@ -89,7 +89,7 @@ module Nanoc::Int
         end
       is_usable_snapshot = @snapshot_contents[snapshot_name] && (compiled? || !is_still_moving)
       unless is_usable_snapshot
-        raise Nanoc::Int::Errors::UnmetDependency.new(self)
+        Fiber.yield(Nanoc::Int::Errors::UnmetDependency.new(self))
       end
 
       @snapshot_contents[snapshot_name].string
