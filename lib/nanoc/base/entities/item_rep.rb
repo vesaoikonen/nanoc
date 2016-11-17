@@ -134,18 +134,6 @@ module Nanoc::Int
       @paths[snapshot]
     end
 
-    contract C::None => nil
-    # Resets the compilation progress for this item representation. This is
-    # necessary when an unmet dependency is detected during compilation.
-    #
-    # @api private
-    #
-    # @return [void]
-    def forget_progress
-      initialize_content
-      nil
-    end
-
     # Returns an object that can be used for uniquely identifying objects.
     #
     # @api private
