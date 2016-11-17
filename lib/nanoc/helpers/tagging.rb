@@ -1,6 +1,7 @@
 module Nanoc::Helpers
   # @see http://nanoc.ws/doc/reference/helpers/#tagging
   module Tagging
+    require 'uri'
     require 'nanoc/helpers/html_escape'
     include Nanoc::Helpers::HTMLEscape
 
@@ -29,7 +30,7 @@ module Nanoc::Helpers
     #
     # @return [String]
     def link_for_tag(tag, base_url)
-      %(<a href="#{h base_url}#{h tag}" rel="tag">#{h tag}</a>)
+      %(<a href="#{h base_url}#{h URI.encode(tag)}" rel="tag">#{h tag}</a>)
     end
   end
 end
